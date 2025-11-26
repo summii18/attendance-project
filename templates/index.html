@@ -1,0 +1,32 @@
+<html>
+  <body>
+    <h2>Attendance System</h2>
+
+    <video id="video" width="400" autoplay></video>
+    <button id="capture">Capture & Recognize</button>
+    
+    <script>
+      const video = document.getElementById("video");
+
+      navigator.mediaDevices.getUserMedia({ video:true })
+        .then(stream => video.srcObject = stream);
+
+      document.getElementById("capture").onclick = async () => {
+        let canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob(async (blob) => {
+          let data = new FormData();
+          data.append("file", blob, "frame.jpg");
+
+          let res = await fetch("/recognize", { method:"POST", body:data });
+          let json = await res.json();
+
+          alert("Student: " + json.student + " (prob: " + json.probability + ")");
+        });
+      };
+    </script>
+  </body>
+</html>
